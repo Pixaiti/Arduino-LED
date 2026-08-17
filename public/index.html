@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arduino Control - HTTP Puro</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .container { background: #1e293b; padding: 2.5rem; border-radius: 1.5rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); text-align: center; max-width: 400px; width: 90%; border: 1px solid #334155; }
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; color: #38bdf8; }
+        p { color: #94a3b8; margin-bottom: 2rem; font-size: 0.95rem; }
+        .btn-group { display: flex; flex-direction: column; gap: 1rem; }
+        button { padding: 1rem 2rem; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 0.75rem; cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-on { background: #10b981; color: white; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+        .btn-on:hover { background: #059669; transform: scale(1.02); }
+        .btn-off { background: #ef4444; color: white; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+        .btn-off:hover { background: #dc2626; transform: scale(1.02); }
+        .status-box { margin-top: 2rem; padding: 0.75rem; background: #0f172a; border-radius: 0.5rem; border: 1px solid #1e293b; font-size: 0.85rem; color: #cbd5e1; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Painel Arduino</h1>
+        <p>Controle do Buzzer via Requisições HTTP</p>
+        
+        <div class="btn-group">
+            <button class="btn-on" onclick="enviarComando('LIGAR')">Ligar Buzzer 🔊</button>
+            <button class="btn-off" onclick="enviarComando('DESLIGAR')">Desligar 🔇</button>
+        </div>
+
+        <div class="status-box" id="statusLog">Pronto para enviar comandos</div>
+    </div>
+
+    <script>
+        const serverURL = "arduino-led-rjlt.onrender.com"
+
+        async function enviarComando(acao) {
+            const statusLog = document.getElementById('statusLog');
+            statusLog.innerText = "Enviando comando...";
+            
+            try {
+                // Faz a requisição HTTP POST para o servidor Node.js
+                const response = await fetch(`${serverURL}/api/buzzer`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ acao: acao })
+                });
+                
+                const dados = await response.json();
+                statusLog.innerText = `Servidor atualizado: ${dados.atual}`;
+                statusLog.style.color = acao === 'LIGAR' ? '#10b981' : '#ef4444';
+            } catch (error) {
+                statusLog.innerText = "Erro ao falar com o servidor.";
+                statusLog.style.color = "#ef4444";
+            }
+        }
+    </script>
+</body>
+</html>
